@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theater AG · Fotos einreichen</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --accent: #38BDF8;
+    --accent-dim: rgba(56,189,248,0.15);
+    --card-bg: rgba(5, 10, 25, 0.75);
+    --card-border: rgba(56,189,248,0.2);
+    --text: #EEF2FF;
+    --muted: #94A3B8;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0; margin: 0;
+    background: #050A18;
+  }
+
+  .bg-layer {
+    position: fixed; inset: 0;
+    background-image: url('WhatsApp_Image_2026-05-04_at_09_35_52.jpeg');
+    background-size: cover;
+    background-position: center top;
+    filter: blur(4px) brightness(0.25) saturate(1.2);
+    z-index: 0;
+    transform: scale(1.06);
+  }
+
+  .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .star {
+    position: absolute; border-radius: 50%; background: #fff; opacity: 0;
+    animation: twinkle var(--dur) var(--delay) infinite;
+  }
+  @keyframes twinkle { 0%,100%{opacity:0} 50%{opacity:var(--op)} }
+
+  /* ── Lock screen ── */
+  #lock-screen {
+    position: relative; z-index: 2;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .lock-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 2.5rem 2rem;
+    width: 100%; max-width: 360px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    text-align: center;
+  }
+
+  .lock-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+
+  .lock-card h2 {
+    font-family: 'Bangers', cursive;
+    font-size: 1.8rem; letter-spacing: 0.07em;
+    color: #fff; text-shadow: 0 0 30px rgba(56,189,248,0.4);
+    margin-bottom: 0.4rem;
+  }
+
+  .lock-card p { font-size: 13px; color: var(--muted); margin-bottom: 1.5rem; }
+
+  .lock-card input[type="password"] {
+    width: 100%;
+    border: 1px solid rgba(56,189,248,0.25);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.85rem;
+    font-family: 'DM Sans', sans-serif; font-size: 16px;
+    color: var(--text);
+    background: rgba(255,255,255,0.05);
+    outline: none; margin-bottom: 0.75rem;
+    transition: border-color 0.15s;
+    text-align: center; letter-spacing: 0.1em;
+  }
+
+  .lock-card input[type="password"]:focus { border-color: var(--accent); }
+
+  .lock-btn {
+    width: 100%; padding: 0.8rem;
+    background: linear-gradient(135deg, #0284C7, #38BDF8);
+    color: #020D1A; border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Bangers', cursive;
+    font-size: 1.1rem; letter-spacing: 0.1em;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(56,189,248,0.3);
+    transition: opacity 0.15s;
+  }
+
+  .lock-btn:hover { opacity: 0.88; }
+
+  .lock-error {
+    font-size: 13px; color: #F87171;
+    margin-top: 0.75rem; min-height: 18px;
+  }
+
+  /* ── Main app ── */
+  #app { display: none; position: relative; z-index: 2; }
+
+  .page {
+    max-width: 500px; margin: 0 auto;
+    padding: 2.5rem 1rem 5rem;
+  }
+
+  header { text-align: center; margin-bottom: 2.5rem; }
+
+  .theater-badge {
+    display: inline-block;
+    border: 1px solid var(--accent); color: var(--accent);
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 5px 16px; border-radius: 999px; margin-bottom: 1rem;
+    background: var(--accent-dim);
+  }
+
+  h1 {
+    font-family: 'Bangers', cursive;
+    font-size: 2.6rem; letter-spacing: 0.07em;
+    color: #fff; text-shadow: 0 0 40px rgba(56,189,248,0.5);
+    margin-bottom: 0.5rem; line-height: 1.1;
+  }
+
+  h1 span { color: var(--accent); }
+  header p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--card-border);
+    padding: 1.5rem; margin-bottom: 1rem;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .field-label {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 6px; display: block;
+  }
+
+  input[type="text"], textarea {
+    width: 100%;
+    border: 1px solid rgba(56,189,248,0.2);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 0.85rem;
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    color: var(--text); background: rgba(255,255,255,0.05);
+    outline: none; transition: border-color 0.15s, background 0.15s;
+  }
+
+  input[type="text"]::placeholder, textarea::placeholder { color: #3B4F66; }
+  input[type="text"]:focus, textarea:focus { border-color: var(--accent); background: rgba(56,189,248,0.07); }
+  textarea { min-height: 80px; resize: vertical; }
+  .field + .field { margin-top: 1.25rem; }
+  .divider { height: 1px; background: var(--card-border); margin: 1.25rem 0; }
+
+  .drop-zone {
+    border: 2px dashed rgba(56,189,248,0.25);
+    border-radius: var(--radius);
+    padding: 2.25rem 1.5rem; text-align: center; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    background: rgba(56,189,248,0.03);
+  }
+
+  .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: rgba(56,189,248,0.08); }
+  .drop-icon { font-size: 2.2rem; margin-bottom: 0.65rem; }
+  .drop-zone h3 { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .drop-zone p { font-size: 13px; color: var(--muted); }
+
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 8px; margin-top: 1rem;
+  }
+
+  .preview-item {
+    position: relative; aspect-ratio: 1;
+    border-radius: var(--radius-sm); overflow: hidden;
+    border: 1px solid rgba(56,189,248,0.2);
+  }
+
+  .preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .preview-item .del {
+    position: absolute; top: 4px; right: 4px;
+    width: 22px; height: 22px;
+    background: rgba(0,0,0,0.7); color: #fff;
+    border: none; border-radius: 50%; font-size: 14px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+
+  .file-count {
+    display: inline-block;
+    background: var(--accent-dim); color: var(--accent);
+    font-size: 12px; font-weight: 500;
+    border-radius: 999px; padding: 2px 10px;
+    margin-left: 8px; vertical-align: middle;
+    border: 1px solid rgba(56,189,248,0.3);
+  }
+
+  .submit-btn {
+    width: 100%; padding: 0.9rem;
+    background: linear-gradient(135deg, #0284C7, #38BDF8);
+    color: #020D1A; border: none; border-radius: var(--radius-sm);
+    font-family: 'Bangers', cursive;
+    font-size: 1.25rem; letter-spacing: 0.1em;
+    cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+    margin-top: 1.25rem;
+    box-shadow: 0 0 24px rgba(56,189,248,0.35);
+  }
+
+  .submit-btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+  .submit-btn:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; }
+
+  .progress-wrap { margin-top: 1rem; display: none; }
+
+  .progress-track { background: rgba(255,255,255,0.07); border-radius: 999px; height: 6px; overflow: hidden; }
+
+  .progress-fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, #0EA5E9, #38BDF8);
+    width: 0%; transition: width 0.3s;
+  }
+
+  .status { font-size: 13px; color: var(--muted); margin-top: 6px; text-align: center; }
+  .status.success { color: var(--accent); font-weight: 500; }
+  .status.error { color: #F87171; }
+  .note { font-size: 12px; color: #3B4F66; text-align: center; line-height: 1.6; margin-top: 1.5rem; }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="stars" id="stars"></div>
+
+<!-- Lock screen -->
+<div id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-icon">🔒</div>
+    <h2>Theater AG</h2>
+    <p>Bitte gib das Passwort ein,<br>um Fotos hochzuladen.</p>
+    <input type="password" id="pw-input" placeholder="Passwort" onkeydown="if(event.key==='Enter') checkPw()" />
+    <button class="lock-btn" onclick="checkPw()">Weiter →</button>
+    <p class="lock-error" id="pw-error"></p>
+  </div>
+</div>
+
+<!-- Main app (hidden until unlocked) -->
+<div id="app">
+  <div class="page">
+    <header>
+      <span class="theater-badge">🎭 Theater AG · Luhe-Gymnasium</span>
+      <h1>Wir gegen<br><span>den Rest der Welt</span></h1>
+      <p>Lade deine Fotos hoch – sie werden erst<br>von der Leitung geprüft, bevor alle sie sehen.</p>
+    </header>
+
+    <div class="card">
+      <div class="field">
+        <label class="field-label" for="inp-name">Dein Name *</label>
+        <input type="text" id="inp-name" placeholder="z. B. Anna Müller" oninput="checkReady()" />
+      </div>
+      <div class="divider"></div>
+      <div class="field">
+        <label class="field-label" for="inp-desc">Beschreibung (optional)</label>
+        <textarea id="inp-desc" placeholder="z. B. Probenfotos 3. Mai, Aufführung, Ausflug…"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <label class="field-label">
+        Bilder auswählen
+        <span class="file-count" id="file-count" style="display:none">0</span>
+      </label>
+      <div class="drop-zone" id="drop-zone"
+        onclick="document.getElementById('file-input').click()"
+        ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+        <div class="drop-icon">🌌</div>
+        <h3>Tippen zum Auswählen</h3>
+        <p>oder Bilder hierher ziehen<br>JPG · PNG · HEIC · mehrere erlaubt</p>
+      </div>
+      <input type="file" id="file-input" accept="image/*" multiple style="display:none" onchange="addFiles(this.files)" />
+      <div class="preview-grid" id="preview-grid"></div>
+    </div>
+
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <p class="status" id="status-msg">Wird hochgeladen…</p>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="doSubmit()" disabled>
+      ★ Bilder einreichen ★
+    </button>
+
+    <p class="note">🔒 Deine Bilder sind nur für die Leitung sichtbar, bis sie freigegeben werden.</p>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // ⚠️  HIER DEINE APPS SCRIPT URL EINTRAGEN:
+  const APPS_SCRIPT_URL = "HIER_DEINE_URL_EINTRAGEN";
+  // Passwort:
+  const PASSWORD = "Theater2026!";
+  // ============================================================
+
+  // Stars
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div'); s.className = 'star';
+    const size = Math.random() * 2 + 1;
+    s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${(Math.random()*4+2).toFixed(1)}s;--delay:${(Math.random()*6).toFixed(1)}s;--op:${(Math.random()*0.5+0.2).toFixed(2)}`;
+    starsEl.appendChild(s);
+  }
+
+  function checkPw() {
+    const val = document.getElementById('pw-input').value;
+    const err = document.getElementById('pw-error');
+    if (val === PASSWORD) {
+      document.getElementById('lock-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+    } else {
+      err.textContent = 'Falsches Passwort. Bitte nochmal versuchen.';
+      document.getElementById('pw-input').value = '';
+      document.getElementById('pw-input').focus();
+    }
+  }
+
+  let files = [];
+  function onDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+  function onDragLeave() { document.getElementById('drop-zone').classList.remove('drag-over'); }
+  function onDrop(e) { e.preventDefault(); document.getElementById('drop-zone').classList.remove('drag-over'); addFiles(e.dataTransfer.files); }
+
+  function addFiles(newFiles) {
+    Array.from(newFiles).forEach(f => { if (f.type.startsWith('image/') || f.name.match(/\.heic$/i)) files.push(f); });
+    renderPreviews(); checkReady();
+  }
+
+  function removeFile(i) { files.splice(i, 1); renderPreviews(); checkReady(); }
+
+  function renderPreviews() {
+    const grid = document.getElementById('preview-grid');
+    const badge = document.getElementById('file-count');
+    grid.innerHTML = '';
+    files.forEach((f, i) => {
+      const wrap = document.createElement('div'); wrap.className = 'preview-item';
+      const img = document.createElement('img'); img.src = URL.createObjectURL(f);
+      const btn = document.createElement('button'); btn.className = 'del'; btn.textContent = '×';
+      btn.onclick = (e) => { e.stopPropagation(); removeFile(i); };
+      wrap.appendChild(img); wrap.appendChild(btn); grid.appendChild(wrap);
+    });
+    badge.style.display = files.length ? 'inline-block' : 'none';
+    badge.textContent = files.length;
+  }
+
+  function checkReady() {
+    document.getElementById('submit-btn').disabled = !(document.getElementById('inp-name').value.trim() && files.length > 0);
+  }
+
+  function toBase64(file) {
+    return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(file); });
+  }
+
+  async function doSubmit() {
+    if (APPS_SCRIPT_URL === "HIER_DEINE_URL_EINTRAGEN") { alert("⚠️ Bitte zuerst die Apps Script URL eintragen!"); return; }
+    const name = document.getElementById('inp-name').value.trim();
+    const desc = document.getElementById('inp-desc').value.trim();
+    const btn = document.getElementById('submit-btn');
+    const wrap = document.getElementById('progress-wrap');
+    const fill = document.getElementById('progress-fill');
+    const msg = document.getElementById('status-msg');
+    btn.disabled = true; wrap.style.display = 'block'; msg.className = 'status';
+    for (let i = 0; i < files.length; i++) {
+      msg.textContent = `Bild ${i + 1} von ${files.length} wird hochgeladen…`;
+      fill.style.width = Math.round((i / files.length) * 100) + '%';
+      try {
+        const b64 = await toBase64(files[i]);
+        await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ name, desc, filename: files[i].name, mimeType: files[i].type || 'image/jpeg', data: b64 }) });
+      } catch {
+        msg.textContent = `Fehler bei Bild ${i + 1}. Bitte erneut versuchen.`;
+        msg.className = 'status error'; btn.disabled = false; return;
+      }
+    }
+    fill.style.width = '100%';
+    msg.textContent = '✦ Alle Bilder erfolgreich eingereicht! Danke 🎭';
+    msg.className = 'status success';
+    files = []; renderPreviews();
+    document.getElementById('inp-name').value = '';
+    document.getElementById('inp-desc').value = '';
+    checkReady();
+  }
+</script>
+</body>
+</html>
